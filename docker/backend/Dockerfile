@@ -31,7 +31,8 @@ RUN composer dump-autoload --optimize
 
 # Configurar permisos
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 775 storage bootstrap/cache
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod -R 775 public
 
 EXPOSE 80
 
