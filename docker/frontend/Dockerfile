@@ -2,12 +2,18 @@ FROM node:18
 
 WORKDIR /app
 
-# Instalar dependencias globales
-RUN npm install -g npm@latest
+# Instalar una versión específica de npm compatible con Node 18
+RUN npm install -g npm@10.2.4
 
-# El resto de la instalación se hará en el docker-compose
-# ya que necesitamos acceso al código del volumen
+# Copiar archivos de dependencias
+COPY frontend/package*.json ./
+
+# Instalar dependencias
+RUN npm install
+
+# Copiar el resto del código
+COPY frontend/ .
 
 EXPOSE 5173
 
-CMD ["sh", "-c", "npm install && npm run dev -- --host 0.0.0.0"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

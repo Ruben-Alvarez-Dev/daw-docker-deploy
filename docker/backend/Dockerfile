@@ -17,4 +17,22 @@ COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
 WORKDIR /var/www/html
 
+# Copiar archivos de composer
+COPY backend/composer.json backend/composer.lock ./
+
+# Instalar dependencias
+RUN composer install --no-scripts --no-autoloader
+
+# Copiar el resto del código
+COPY backend/ .
+
+# Generar autoloader optimizado
+RUN composer dump-autoload --optimize
+
+# Configurar permisos
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
+
 EXPOSE 80
+
+CMD ["apache2-foreground"]
