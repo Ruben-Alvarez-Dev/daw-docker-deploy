@@ -1,11 +1,12 @@
 FROM php:8.2-apache
 
-# Instalar extensiones PHP necesarias
+# Instalar extensiones PHP y herramientas necesarias
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     unzip \
     git \
+    default-mysql-client \
     && docker-php-ext-install pdo pdo_mysql zip
 
 # Instalar Composer
@@ -14,6 +15,10 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Configurar Apache
 RUN a2enmod rewrite
 COPY docker/backend/apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Copiar script de espera
+COPY docker/backend/wait-for-db.sh /usr/local/bin/wait-for-db.sh
+RUN chmod +x /usr/local/bin/wait-for-db.sh
 
 WORKDIR /var/www/html
 
