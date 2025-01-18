@@ -1,51 +1,85 @@
 # Entorno de Desarrollo Docker
 
 Este proyecto contiene un entorno de desarrollo completo utilizando Docker, que incluye:
-
-- Frontend (Node.js)
-- Backend (PHP)
+- Frontend (React + Vite)
+- Backend (Laravel)
 - Base de datos (MySQL)
+- phpMyAdmin
+
+## Requisitos Previos
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- Git
+
+## Instalación Rápida
+
+1. Clona este repositorio:
+```bash
+git clone --recursive https://github.com/Ruben-Alvarez-Dev/daw-docker-deploy
+cd daw-docker-deploy
+```
+
+2. Ejecuta el script de instalación:
+```bash
+./install.sh
+```
+
+¡Eso es todo! El script se encargará de:
+- Verificar los requisitos necesarios
+- Configurar los repositorios
+- Iniciar los contenedores
+- Mostrar las URLs de acceso
+
+## Acceso a los Servicios
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- phpMyAdmin: http://localhost:8080
+
+## Credenciales de Base de Datos
+
+- Usuario: daw_user
+- Contraseña: daw_password
+- Base de datos: daw_db
 
 ## Estructura del Proyecto
 
 ```
 .
-├── frontend/         # Proyecto frontend
-├── backend/         # Proyecto backend
+├── frontend/         # Proyecto frontend (React + Vite)
+├── backend/         # Proyecto backend (Laravel)
 ├── docker/          # Configuraciones de Docker
 └── docker-compose.yml
 ```
 
-## Requisitos Previos
+## Comandos Útiles
 
-- Docker
-- Docker Compose
-- Git
-
-## Instalación
-
-1. Clona este repositorio:
+### Frontend
 ```bash
-git clone [URL-DEL-REPO]
+# Instalar nuevas dependencias
+docker-compose exec frontend npm install [package]
+
+# Ver logs
+docker-compose logs -f frontend
 ```
 
-2. Clona los repositorios de frontend y backend en sus respectivas carpetas:
+### Backend
 ```bash
-git clone https://github.com/Ruben-Alvarez-Dev/daw_frontend frontend
-git clone https://github.com/Ruben-Alvarez-Dev/daw_backend backend
+# Ejecutar comandos de artisan
+docker-compose exec backend php artisan [comando]
+
+# Ver logs
+docker-compose logs -f backend
 ```
 
-3. Inicia los contenedores:
+### Base de Datos
 ```bash
-docker-compose up -d
+# Acceder a MySQL
+docker-compose exec mysql mysql -u daw_user -p
 ```
-
-## Uso
-
-- Frontend: http://localhost:3000
-- Backend: http://localhost:8000
-- MySQL: localhost:3306
 
 ## Gestión de Repositorios
 
-Cada proyecto (frontend y backend) mantiene su propio repositorio Git independiente. Puedes realizar commits y push desde dentro de cada carpeta de manera normal.
+Cada proyecto (frontend y backend) mantiene su propio repositorio Git independiente.
+Puedes hacer commits y push desde dentro de cada carpeta de manera normal.
