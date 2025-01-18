@@ -4,26 +4,46 @@
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
 echo -e "${BLUE}=== Iniciando instalación del entorno de desarrollo ===${NC}"
 
-# Función para verificar si un puerto está en uso
-check_port() {
+# Función para matar proceso en un puerto
+kill_process_on_port() {
+    local port=$1
+    local pid=$(lsof -ti :$port)
+    if [ ! -z "$pid" ]; then
+        echo -e "${YELLOW}Puerto $port está en uso. Terminando proceso ${pid}...${NC}"
+        kill -9 $pid
+        sleep 1
+    fi
+}
+
+# Función para verificar y liberar puerto
+check_and_free_port() {
     local port=$1
     if lsof -i ":$port" >/dev/null 2>&1; then
-        echo -e "${RED}Error: El puerto $port está en uso.${NC}"
-        echo -e "Por favor, libera el puerto $port y vuelve a intentarlo."
-        exit 1
+        echo -e "${YELLOW}Puerto $port está en uso.${NC}"
+        read -p "¿Quieres terminar el proceso que usa este puerto? (s/n): " choice
+        case "$choice" in 
+            s|S|"" ) 
+                kill_process_on_port $port
+                ;;
+            * )
+                echo -e "${RED}No se puede continuar sin liberar el puerto $port.${NC}"
+                exit 1
+                ;;
+        esac
     fi
 }
 
 # Verificar puertos necesarios
 echo -e "\n${BLUE}[1/6]${NC} Verificando puertos..."
-check_port 5173  # Frontend
-check_port 8000  # Backend
-check_port 3306  # MySQL
-check_port 8080  # phpMyAdmin
+check_and_free_port 5173  # Frontend
+check_and_free_port 8000  # Backend
+check_and_free_port 3306  # MySQL
+check_and_free_port 8080  # phpMyAdmin
 
 # Verificar Docker
 echo -e "\n${BLUE}[2/6]${NC} Verificando Docker..."
@@ -49,15 +69,15 @@ if ! docker compose version >/dev/null 2>&1; then
     exit 1
 fi
 
+# Detener contenedores existentes
+echo -e "\n${BLUE}[5/6]${NC} Deteniendo contenedores existentes..."
+docker compose down -v >/dev/null 2>&1
+
 # Inicializar submódulos git si no existen
-echo -e "\n${BLUE}[5/6]${NC} Configurando repositorios..."
+echo -e "\n${BLUE}[6/6]${NC} Configurando repositorios..."
 if [ ! -d "frontend/.git" ] || [ ! -d "backend/.git" ]; then
     git submodule update --init --recursive
 fi
-
-# Detener contenedores existentes y limpiar
-echo -e "\n${BLUE}[6/6]${NC} Limpiando entorno anterior..."
-docker compose down -v >/dev/null 2>&1
 
 # Iniciar contenedores
 echo -e "\n${BLUE}Iniciando contenedores...${NC}"
