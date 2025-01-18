@@ -17,8 +17,9 @@ COPY docker/backend/apache.conf /etc/apache2/sites-available/000-default.conf
 
 WORKDIR /var/www/html
 
-# Copiar archivos de composer
+# Copiar archivos de composer y .env
 COPY backend/composer.json backend/composer.lock ./
+COPY backend/.env.example .env
 
 # Instalar dependencias
 RUN composer install --no-scripts --no-autoloader
@@ -26,8 +27,9 @@ RUN composer install --no-scripts --no-autoloader
 # Copiar el resto del código
 COPY backend/ .
 
-# Generar autoloader optimizado
-RUN composer dump-autoload --optimize
+# Generar autoloader optimizado y clave de aplicación
+RUN composer dump-autoload --optimize && \
+    php artisan key:generate
 
 # Configurar permisos
 RUN chown -R www-data:www-data /var/www/html \
