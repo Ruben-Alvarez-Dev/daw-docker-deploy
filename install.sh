@@ -72,6 +72,7 @@ fi
 # Detener contenedores existentes
 echo -e "\n${BLUE}[5/6]${NC} Deteniendo contenedores existentes..."
 docker compose down -v >/dev/null 2>&1
+docker compose down --remove-orphans -v >/dev/null 2>&1
 
 # Inicializar submódulos git si no existen
 echo -e "\n${BLUE}[6/6]${NC} Configurando repositorios..."
