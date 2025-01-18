@@ -30,8 +30,8 @@ services:
       - DB_HOST=mysql
       - DB_PORT=3306
       - DB_DATABASE=daw_db
-      - DB_USERNAME=daw_user
-      - DB_PASSWORD=daw_password
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
     depends_on:
       - mysql
 
@@ -40,9 +40,7 @@ services:
     platform: linux/amd64
     environment:
       MYSQL_DATABASE: daw_db
-      MYSQL_USER: daw_user
-      MYSQL_PASSWORD: daw_password
-      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_ROOT_PASSWORD: root
     ports:
       - "3306:3306"
     volumes:
@@ -53,8 +51,8 @@ services:
     ports:
       - "8080:80"
     environment:
-      PMA_HOST: mysql
-      MYSQL_ROOT_PASSWORD: root_password
+      - PMA_HOST=mysql
+      - MYSQL_ROOT_PASSWORD=root
     depends_on:
       - mysql
 
