@@ -16,13 +16,16 @@ RUN apt-get update && apt-get install -y \
     default-mysql-client \
     tcpdump \
     telnet \
-    wget \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    wget
 
-# Install Node.js and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    npm
+# Install Node.js and npm using n
+RUN curl -fsSL https://raw.githubusercontent.com/tj/n/master/bin/n -o n \
+    && bash n lts \
+    && rm n \
+    && npm install -g npm@latest
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -30,27 +33,29 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Set working directory
 WORKDIR /var/www/html
 
-# Configure Apache
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
+
+# Copy Apache configuration
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
-# Copy application files
+# Copy application code
 COPY daw_backend/ /var/www/html/
 COPY daw_frontend/ /var/www/frontend/
 
-# Install Laravel dependencies
+# Install PHP dependencies
 RUN composer install --no-interaction
 
-# Install React dependencies
+# Install frontend dependencies
 WORKDIR /var/www/frontend
 RUN npm install
 
-# Set correct permissions
+# Set permissions
 WORKDIR /var/www/html
 RUN chown -R www-data:www-data storage
 RUN chmod -R 775 storage
 
-# Copy start script
+# Copy and set startup script
 COPY start-dev.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start-dev.sh
 
