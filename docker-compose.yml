@@ -1,57 +1,30 @@
 version: '3.8'
 
 services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: daw_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
   app:
     image: rubenalvarezdev/daw_ruben_alvarez:dev
-    container_name: daw_app
     ports:
       - "5173:5173"
       - "8000:8000"
-    volumes:
-      - ./daw_frontend:/var/www/frontend
-      - ./daw_backend:/var/www/html
-      - /var/www/frontend/node_modules
-      - /var/www/html/vendor
     environment:
-      - DB_CONNECTION=mysql
-      - DB_HOST=daw_db
-      - DB_PORT=3306
-      - DB_DATABASE=daw_db
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: daw_db
+      DB_USERNAME: root
+      DB_PASSWORD: root
     depends_on:
-      db:
-        condition: service_healthy
-
-  db:
-    image: mysql:8.0
-    container_name: daw_db
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_DATABASE=daw_db
-      - MYSQL_ROOT_PASSWORD=root
-      - MYSQL_ROOT_HOST=%
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: daw_phpmyadmin
-    ports:
-      - "8080:80"
-    environment:
-      - PMA_HOST=daw_db
-      - MYSQL_ROOT_PASSWORD=root
-    depends_on:
-      db:
-        condition: service_healthy
+      - db
 
 volumes:
   mysql_data:
