@@ -24,9 +24,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      daw_network:
-        aliases:
-          - app
+      - daw_network
 
   db:
     image: mysql:8.0
@@ -38,12 +36,7 @@ services:
       - MYSQL_ROOT_HOST=%
     volumes:
       - mysql_data:/var/lib/mysql
-    command: >
-      --default-authentication-plugin=mysql_native_password
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
-      --skip-name-resolve
-      --bind-address=0.0.0.0
+    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
@@ -51,9 +44,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      daw_network:
-        aliases:
-          - db
+      - daw_network
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -67,16 +58,11 @@ services:
       db:
         condition: service_healthy
     networks:
-      daw_network:
-        aliases:
-          - phpmyadmin
+      - daw_network
 
 networks:
   daw_network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
 
 volumes:
   mysql_data:
