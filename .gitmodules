@@ -1,0 +1,6 @@
+[submodule "daw_backend"]
+	path = daw_backend
+	url = https://github.com/Ruben-Alvarez-Dev/daw_backend.git
+[submodule "daw_frontend"]
+	path = daw_frontend
+	url = https://github.com/Ruben-Alvarez-Dev/daw_frontend.git
