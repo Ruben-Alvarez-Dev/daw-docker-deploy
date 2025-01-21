@@ -2,10 +2,22 @@
 
 # Wait for MySQL to be ready
 echo "Waiting for MySQL to be ready..."
-while ! mysqladmin ping -h"db" -u"root" -p"root" --silent; do
-    sleep 1
+max_tries=30
+count=0
+while [ $count -lt $max_tries ]; do
+    if mysql -h"db" -u"root" -p"root" -e "SELECT 1" >/dev/null 2>&1; then
+        echo "MySQL is ready!"
+        break
+    fi
+    echo "Waiting for MySQL to be ready... ($((count + 1))/$max_tries)"
+    count=$((count + 1))
+    sleep 2
 done
-echo "MySQL is ready!"
+
+if [ $count -eq $max_tries ]; then
+    echo "Error: MySQL did not become ready in time"
+    exit 1
+fi
 
 # Copy environment file
 cd /var/www/html
