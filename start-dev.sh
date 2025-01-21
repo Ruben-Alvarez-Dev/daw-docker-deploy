@@ -6,9 +6,13 @@ max_tries=30
 count=0
 
 # Debug: Show network info
-echo "Debug: Checking network..."
-ping -c 1 db
-echo "Debug: Checking MySQL port..."
+echo "Debug: Network Information"
+ip addr show
+echo "Debug: DNS Resolution"
+nslookup db || echo "DNS lookup failed"
+echo "Debug: Route Information"
+ip route
+echo "Debug: Testing connection to db:3306"
 nc -zv db 3306 || echo "Port not accessible yet"
 
 while [ $count -lt $max_tries ]; do
@@ -19,11 +23,15 @@ while [ $count -lt $max_tries ]; do
     fi
     echo "Waiting for MySQL to be ready... ($((count + 1))/$max_tries)"
     
-    # Debug: Check MySQL status
+    # Debug: Check MySQL status every 5 attempts
     if [ $((count % 5)) -eq 0 ]; then
-        echo "Debug: Checking MySQL container status..."
-        ping -c 1 db
+        echo "Debug: Network status for attempt $((count + 1))"
+        echo "Debug: Testing connection to db:3306"
         nc -zv db 3306 || echo "Port not accessible"
+        echo "Debug: Current routes:"
+        ip route
+        echo "Debug: DNS Resolution:"
+        nslookup db || echo "DNS lookup failed"
     fi
     
     count=$((count + 1))
@@ -32,7 +40,16 @@ done
 
 if [ $count -eq $max_tries ]; then
     echo "Error: MySQL did not become ready in time"
-    echo "Debug: Final connection attempt with verbose output..."
+    echo "Debug: Final diagnostics..."
+    echo "Debug: Network interfaces:"
+    ip addr show
+    echo "Debug: Routes:"
+    ip route
+    echo "Debug: DNS Resolution:"
+    nslookup db
+    echo "Debug: Port check:"
+    nc -zv db 3306
+    echo "Debug: Final MySQL connection attempt with verbose output..."
     mysql -v -h"db" -u"root" -p"root" -e "SELECT 1"
     exit 1
 fi

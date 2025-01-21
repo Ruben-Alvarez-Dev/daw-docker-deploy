@@ -14,13 +14,15 @@ RUN apt-get update && apt-get install -y \
     netcat-traditional \
     dnsutils \
     default-mysql-client \
-    nodejs \
-    npm \
+    tcpdump \
+    telnet \
+    wget \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Install Node.js and npm
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
+    && apt-get install -y nodejs \
+    npm
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -51,9 +53,6 @@ RUN chmod -R 775 storage
 # Copy start script
 COPY start-dev.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start-dev.sh
-
-# Add hosts entry for db
-RUN echo "127.0.0.1 db" >> /etc/hosts
 
 EXPOSE 80 5173
 
