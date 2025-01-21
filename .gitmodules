@@ -1,6 +1,0 @@
-[submodule "backend"]
-	path = backend
-	url = https://github.com/Ruben-Alvarez-Dev/daw_backend
-[submodule "frontend"]
-	path = frontend
-	url = https://github.com/Ruben-Alvarez-Dev/daw_frontend

@@ -1,38 +1,30 @@
-version: '3.8'
-
 services:
-  frontend:
-    build:
-      context: ./daw_frontend
-      dockerfile: Dockerfile
+  app:
+    image: rubenalvarezdev/daw_ruben_alvarez:dev
     ports:
-      - "5173:5173"
+      - "5173:5173"  # Frontend
+      - "8000:8000"  # Backend
     volumes:
-      - ./daw_frontend:/app
-      - /app/node_modules
-    environment:
-      - VITE_API_URL=http://localhost:8000
-    depends_on:
-      - backend
-
-  backend:
-    build:
-      context: ./daw_backend
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    volumes:
+      - ./daw_frontend:/var/www/frontend
       - ./daw_backend:/var/www/html
+      - /var/www/frontend/node_modules
       - /var/www/html/vendor
     environment:
+      - VITE_API_URL=http://localhost:8000
+      - APP_KEY=base64:KjvPpVC/shpL7vqGzmJRf/7brbCkxEu+P8CJV8X1tVQ=
       - DB_CONNECTION=mysql
       - DB_HOST=db
       - DB_PORT=3306
       - DB_DATABASE=daw_db
       - DB_USERNAME=root
       - DB_PASSWORD=root
+      - JWT_SECRET=LA9ny76ISxXEYEqGVP8agEkmJk2H9kOS6JpX4sure9jJEloSjjjQeg2zjEoR415q
+      - JWT_ALGO=HS256
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    networks:
+      - daw_network
 
   db:
     image: mysql:8.0
@@ -43,6 +35,32 @@ services:
       - MYSQL_ROOT_PASSWORD=root
     volumes:
       - mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - daw_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - MYSQL_ROOT_PASSWORD=root
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - daw_network
+
+networks:
+  daw_network:
+    driver: bridge
 
 volumes:
   mysql_data:
