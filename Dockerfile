@@ -10,6 +10,9 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
+    iputils-ping \
+    netcat-traditional \
+    dnsutils \
     default-mysql-client \
     nodejs \
     npm \
@@ -48,6 +51,9 @@ RUN chmod -R 775 storage
 # Copy start script
 COPY start-dev.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/start-dev.sh
+
+# Add hosts entry for db
+RUN echo "127.0.0.1 db" >> /etc/hosts
 
 EXPOSE 80 5173
 
