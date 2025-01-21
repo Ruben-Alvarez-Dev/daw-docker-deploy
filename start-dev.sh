@@ -4,18 +4,36 @@
 echo "Waiting for MySQL to be ready..."
 max_tries=30
 count=0
+
+# Debug: Show network info
+echo "Debug: Checking network..."
+ping -c 1 db
+echo "Debug: Checking MySQL port..."
+nc -zv db 3306 || echo "Port not accessible yet"
+
 while [ $count -lt $max_tries ]; do
-    if mysql -h"db" -u"root" -p"root" -e "SELECT 1" >/dev/null 2>&1; then
+    echo "Debug: Attempt $((count + 1)) - trying to connect to MySQL..."
+    if mysql -h"db" -u"root" -p"root" -e "SELECT 1" 2>&1; then
         echo "MySQL is ready!"
         break
     fi
     echo "Waiting for MySQL to be ready... ($((count + 1))/$max_tries)"
+    
+    # Debug: Check MySQL status
+    if [ $((count % 5)) -eq 0 ]; then
+        echo "Debug: Checking MySQL container status..."
+        ping -c 1 db
+        nc -zv db 3306 || echo "Port not accessible"
+    fi
+    
     count=$((count + 1))
-    sleep 2
+    sleep 3
 done
 
 if [ $count -eq $max_tries ]; then
     echo "Error: MySQL did not become ready in time"
+    echo "Debug: Final connection attempt with verbose output..."
+    mysql -v -h"db" -u"root" -p"root" -e "SELECT 1"
     exit 1
 fi
 
