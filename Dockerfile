@@ -29,19 +29,20 @@ WORKDIR /var/www/html
 RUN a2enmod rewrite
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
-# Copy application code
-COPY daw_backend/ /var/www/html/
-COPY daw_frontend/ /var/www/frontend/
+# Clone repositories and setup application
+RUN git clone https://github.com/Ruben-Alvarez-Dev/daw_backend.git /var/www/html/ && \
+    git clone https://github.com/Ruben-Alvarez-Dev/daw_frontend.git /var/www/frontend/
 
-# Install dependencies
-RUN composer install --no-interaction
+# Install backend dependencies
+WORKDIR /var/www/html
+RUN composer install --no-interaction && \
+    cp .env.example .env.docker && \
+    chown -R www-data:www-data storage && \
+    chmod -R 775 storage
+
+# Install frontend dependencies
 WORKDIR /var/www/frontend
 RUN npm install
-
-# Set permissions
-WORKDIR /var/www/html
-RUN chown -R www-data:www-data storage
-RUN chmod -R 775 storage
 
 # Setup startup script
 COPY start-dev.sh /usr/local/bin/
